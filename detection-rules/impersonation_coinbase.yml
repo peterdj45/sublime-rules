@@ -28,6 +28,17 @@ source: |
       and sender.email.domain.domain not in $recipient_domains
     )
   )
+  
+  // negate event invitations without the Coinbase logo
+  and not (
+    (
+      strings.icontains(subject.subject, 'invitation')
+      or strings.icontains(subject.subject, 'invited')
+      and not any(ml.logo_detect(beta.message_screenshot()).brands,
+                  .name == "Coinbase" and .confidence in ("medium", "high")
+      )
+    )
+  )
 
   // negate highly trusted sender domains unless they fail DMARC authentication
   and (
